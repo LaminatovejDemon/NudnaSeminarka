@@ -1,0 +1,9 @@
+Library/
+Temp/
+Assembly-CSharp-vs.csproj
+Assembly-CSharp.csproj
+Assembly-UnityScript-firstpass-vs.unityproj
+Assembly-UnityScript-firstpass.unityproj
+_DUNGEON_master.sln
+_DUNGEON_master.userprefs
+_DUNGEON_master-csharp.sln
