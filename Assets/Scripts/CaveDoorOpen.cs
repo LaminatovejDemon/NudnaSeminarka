@@ -3,7 +3,7 @@ using System.Collections;
 
 public class CaveDoorOpen : MonoBehaviour {
 
-	string DoorStatus;
+	bool isOpened;
 	Animator DoorAnimator;
 	public pole_01 PoleScript;
 	public MainCamera_Movement PositioningScript;
@@ -12,43 +12,31 @@ public class CaveDoorOpen : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
-		DoorStatus = "Closed";
+		isOpened = false;
 		DoorAnimator = GetComponent<Animator>();
-
 	}
 
 	void OnMouseDown()
 	{
-		if ((DoorStatus == "Closed")&&(Vector3.Distance (PositioningScript._PlayerPosition, transform.position) < 1.5f) && ((Time.time - PositioningScript._MouseTap) < 1f))
+		if (
+			!isOpened 
+		    && Vector3.Distance (PositioningScript._PlayerPosition, transform.position) < 1.5f
+		    && (Time.time - PositioningScript._MouseTap) < 1f)
 		{
 			Debug.Log("OTVIRAME DVERE");
 			DoorAnimator.SetTrigger("Open");
-			DoorStatus = "Opening";
+			isOpened = true;
 			PoleScript.TestField[7,7]=0;
-
-
-		}
-
-		if ((DoorStatus == "Opened")&&(Vector3.Distance (PositioningScript._PlayerPosition, transform.position) < 1.5f)  && ((Time.time - PositioningScript._MouseTap) < 1f))
+		} else if (
+			isOpened
+			&& Vector3.Distance (PositioningScript._PlayerPosition, transform.position) < 1.5f
+			&& ((Time.time - PositioningScript._MouseTap) < 1f))
 		{
 			Debug.Log("ZAVIRAME DVERE");
 			DoorAnimator.SetTrigger("Close");
-			DoorStatus = "Closing";
+			isOpened = false;
 			PoleScript.TestField[7,7]=1;
-
-
 		}
-
-		if (DoorStatus == "Closing") 
-		{
-			DoorStatus = "Closed";
-		}
-		if (DoorStatus == "Opening") 
-		{
-			DoorStatus = "Opened";
-		}
-
-
 
 	}
 
