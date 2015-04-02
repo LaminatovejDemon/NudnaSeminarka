@@ -83,8 +83,8 @@ public class Light_Intensity : MonoBehaviour {
 			StartTime = Time.time;
 		}
 
-		light.intensity = _LightIntensity + amplitude/7f + amplitude2/4f;
-		light.range = 2.25f+1f * (_LightIntensity + amplitude/5f + amplitude2/3f)+PochodenLife;
+		GetComponent<Light>().intensity = _LightIntensity + amplitude/7f + amplitude2/4f;
+		GetComponent<Light>().range = 2.25f+1f * (_LightIntensity + amplitude/5f + amplitude2/3f)+PochodenLife;
 		
 	}
 }

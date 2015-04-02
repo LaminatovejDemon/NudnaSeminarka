@@ -19,21 +19,23 @@ public class CaveDoorOpen : MonoBehaviour {
 
 	void OnMouseDown()
 	{
-		if ((DoorStatus == "Closed")&&(Vector3.Distance (PositioningScript._PlayerPosition, transform.position) < 1.5f))
+		if ((DoorStatus == "Closed")&&(Vector3.Distance (PositioningScript._PlayerPosition, transform.position) < 1.5f) && ((Time.time - PositioningScript._MouseTap) < 1f))
 		{
 			Debug.Log("OTVIRAME DVERE");
 			DoorAnimator.SetTrigger("Open");
 			DoorStatus = "Opening";
 			PoleScript.TestField[7,7]=0;
 
+
 		}
 
-		if ((DoorStatus == "Opened")&&(Vector3.Distance (PositioningScript._PlayerPosition, transform.position) < 1.5f))
+		if ((DoorStatus == "Opened")&&(Vector3.Distance (PositioningScript._PlayerPosition, transform.position) < 1.5f)  && ((Time.time - PositioningScript._MouseTap) < 1f))
 		{
 			Debug.Log("ZAVIRAME DVERE");
 			DoorAnimator.SetTrigger("Close");
 			DoorStatus = "Closing";
 			PoleScript.TestField[7,7]=1;
+
 
 		}
 
@@ -54,6 +56,7 @@ public class CaveDoorOpen : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
+		//Debug.Log ( Time.time - PositioningScript._MouseTap);
 	
 	}
 }

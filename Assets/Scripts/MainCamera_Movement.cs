@@ -10,14 +10,15 @@ public class MainCamera_Movement : MonoBehaviour
 	Vector3 _CameraPosition;
 	public Vector3 _PlayerPosition = new Vector3 (1, 0.5f, 1);
 	public float _CameraDistance = 1.0f;
-	
-	
+	//public string _MouseStatus;
+	public float _MouseTap; //Time when mouse tap happens
 	
 	// Use this for initialization
 	
 	
 	void Upmovement ()
 	{
+		//_MouseStatus = "disabled";
 		_TargetPosition += Quaternion.AngleAxis(_TargetAngle,Vector3.up) * new Vector3(0, 0, 1);
 		int i = (int) (_TargetPosition.x+0.5f);
 		int ii = (int) (_TargetPosition.z+0.5f);
@@ -33,6 +34,7 @@ public class MainCamera_Movement : MonoBehaviour
 	
 	void Downmovement ()
 	{
+		//_MouseStatus = "disabled";
 		_TargetPosition -= Quaternion.AngleAxis(_TargetAngle,Vector3.up) *  new Vector3 (0, 0, 1);
 		int i = (int) (_TargetPosition.x+0.5f);
 		int ii = (int) (_TargetPosition.z+0.5f);
@@ -48,11 +50,13 @@ public class MainCamera_Movement : MonoBehaviour
 	
 	void Leftturning ()
 	{
+		//_MouseStatus = "disabled";
 		_TargetAngle -= 90;
 	}
 	
 	void Rightturning ()
 	{
+		//_MouseStatus = "disabled";
 		_TargetAngle += 90;
 	}
 	
@@ -61,6 +65,7 @@ public class MainCamera_Movement : MonoBehaviour
 		_TargetPosition = new Vector3 (1, 0.4f, 1);
 		_PlayerPosition = new Vector3 (1, 0.4f, 1);
 		_CameraPosition = Camera.main.transform.position;
+		//_MouseStatus = "disabled";
 		
 		
 	}
@@ -73,6 +78,7 @@ public class MainCamera_Movement : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
+		//Debug.Log ("MOUSE STATUS JE" + _MouseStatus);
 		
 		//if (Input.anyKeyDown)
 		//{
@@ -92,13 +98,22 @@ public class MainCamera_Movement : MonoBehaviour
 			distanceon = true;
 			
 		}
-		
+
+
+				
 		if (distanceon) 
 		{
 			distancedrag = Mathf.Sqrt ((Input.mousePosition.x - mousex) * (Input.mousePosition.x - mousex) + (Input.mousePosition.y - mousey) * (Input.mousePosition.y - mousey));
 			//Debug.Log("Distance je: "+distancedrag);
 		}
-		
+
+		if (Input.GetMouseButtonUp(0) && (distanceon == true) && (distancedrag < 29.9999f)) 
+		    {
+			_MouseTap = Time.time;
+			distanceon = false;
+			distancedrag = 0f;
+		}
+
 		
 		
 		//		if (distancedrag > 50)
@@ -110,6 +125,7 @@ public class MainCamera_Movement : MonoBehaviour
 		//		if (Input.GetMouseButtonUp(0))
 		if (distancedrag > 30) 
 		{
+			//_MouseStatus = "slide";
 			float mousexx = (Input.mousePosition.x);
 			float mouseyy = (Input.mousePosition.y);
 			//Debug.Log("Released left click at" + mousexx + "," + mouseyy);

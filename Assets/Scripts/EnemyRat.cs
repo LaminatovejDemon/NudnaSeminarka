@@ -140,7 +140,7 @@ public class EnemyRat : MonoBehaviour {
 		RatZ = 7;
 		transform.position = new Vector3(RatX, RatY, RatZ);
 		transform.eulerAngles = new Vector3(0, RatAngle, 0);
-		animation.Play ("idle");
+		GetComponent<Animation>().Play ("idle");
 		BludisteField = PoleScript.TestField;
 		RatStatus = "moving";
 		
@@ -209,7 +209,7 @@ public class EnemyRat : MonoBehaviour {
 		if (transform.position !=new Vector3(RatX,0,RatZ)) 
 		{
 			KrysaMovement();
-			animation.Play ("walk");
+			GetComponent<Animation>().Play ("walk");
 		}
 
 		// KDYZ KRYSA DOJDE NAPUL CESTY V PATHFINDINGU TAK ZNOVA PATHFINDING - KRYSA SE PAK POHYBUJE PLYNULE A NE PO SKOCICH
@@ -228,7 +228,7 @@ public class EnemyRat : MonoBehaviour {
 		if (krysaeulers.y != RatAngle) 
 		{
 			KrysaRotation ();
-			animation.Play ("walk");
+			GetComponent<Animation>().Play ("walk");
 		}
 
 
@@ -269,7 +269,7 @@ public class EnemyRat : MonoBehaviour {
 		//KDYZ JE KRYSA NA MISTE A NEUTOCI, TAK IDLE ANIMACE - zatim se nemuze stat
 		if ((transform.position == new Vector3(RatX,0,RatZ)) && (krysaeulers.y == RatAngle) && (!RatAttackGO)) 
 		{
-			animation.Play ("idle");
+			GetComponent<Animation>().Play ("idle");
 		}	
 
 		// KDYZ MUZE ZAUTOCIT TAK ZAUTOCI
@@ -283,7 +283,7 @@ public class EnemyRat : MonoBehaviour {
 		// KDYZ ZAUTOCIL/A/O/I TAK PROBIHA UTOK
 		if ((RatAttackGO) && ((Time.time - RatAttackTime)<(RatAttackInterval/2)))
 		{
-			animation.Play("4LegsBiteAttack");
+			GetComponent<Animation>().Play("4LegsBiteAttack");
 		}
 
 		if ((RatAttackGO) && ((Time.time - RatAttackTime)>(RatAttackInterval/2)))
