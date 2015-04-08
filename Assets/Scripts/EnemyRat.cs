@@ -403,7 +403,7 @@ public class EnemyRat : MonoBehaviour {
 	} //tu konci update
 
 	void DoDamage () {
-		if (CanAttack) {
+		if (CanAttack && RatPathDistance == 1) {
 			playerController.GetHit (damage);
 			Debug.Log ("Player Health: " + playerController.GetHealth());
 		}
