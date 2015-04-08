@@ -22,6 +22,7 @@ public class EnemyRat : MonoBehaviour {
 
 	PlayerController playerController;
 	float damage = 15f;
+	public float health = 75f;
 
 	//pathfinding variables
 	float PathfindingBreak = 2f;
@@ -156,191 +157,192 @@ public class EnemyRat : MonoBehaviour {
 	void Update () 
 	{
 
-	// PATHFINDING SE DELA VZDY V INTERVALU PATHFINDINGBREAK
-	if (!DoPathfinding)
-	{
-		if ((PathfindingTime+PathfindingBreak)<Time.time)
-		{
-			DoPathfinding = true;
-		}
-	}
-
-
-	if (DoPathfinding) 
-	{
-		Pathfinding ();
-
-		if ((RatPathDistance < 100) && (RatPathDistance>1))
+		if (health > 0) {
+			// PATHFINDING SE DELA VZDY V INTERVALU PATHFINDINGBREAK
+			if (!DoPathfinding)
 			{
-			
-				if ((PathfindingField [RatX, RatZ-1]) == (RatPathDistance - 1)) 
+				if ((PathfindingTime+PathfindingBreak)<Time.time)
 				{
+					DoPathfinding = true;
+				}
+			}
 
+
+			if (DoPathfinding) 
+			{
+				Pathfinding ();
+
+				if ((RatPathDistance < 100) && (RatPathDistance>1))
+					{
+					
+						if ((PathfindingField [RatX, RatZ-1]) == (RatPathDistance - 1)) 
+						{
+
+							if (RatAngle == -90) RatAngle = -180;
+							if (RatAngle !=-180) RatAngle = 180;
+							RatZ -= 1;
+						}
+					
+						if ((PathfindingField [RatX, RatZ+1]) == (RatPathDistance - 1)) 
+						{
+							if (RatAngle == 270) RatAngle = 360;
+							if (RatAngle != 360) RatAngle = 0;
+							RatZ += 1;
+						}
+
+						if ((PathfindingField [RatX-1, RatZ]) == (RatPathDistance - 1)) 
+						{
+							if (RatAngle == 180) RatAngle = 270;
+							if (RatAngle != 270) RatAngle = -90;
+							RatX -= 1;
+						}
+
+						if ((PathfindingField [RatX+1, RatZ]) == (RatPathDistance - 1)) 
+						{
+							RatAngle = 90;
+							RatX += 1;
+						}
+
+						//Debug.Log("kryse prideluji uhel" + RatAngle);
+
+					}
+
+			
+				
+			}
+
+			// KDYZ MA KRYSA JINOU POZICI, TAK ANIMACE NA KOREKTNI POZICI
+			if (transform.position !=new Vector3(RatX,0,RatZ)) 
+			{
+				KrysaMovement();
+				GetComponent<Animation>().Play ("walk");
+			}
+
+			// KDYZ KRYSA DOJDE NAPUL CESTY V PATHFINDINGU TAK ZNOVA PATHFINDING - KRYSA SE PAK POHYBUJE PLYNULE A NE PO SKOCICH
+			if ((transform.position == new Vector3(RatX,0,RatZ)) && (RatPathDistance>1) && (RatPathDistance<100)) 
+			{
+				RatStatus = "sneaking";
+				DoPathfinding = true;
+			}
+
+			if (RatPathDistance == 100) 
+			{
+				RatStatus = "moving";
+			}
+
+			// KDYZ MA KRYSA JINOU ROTACI, TAK ANIMACE NA KOREKTNI ROTACI
+			if (krysaeulers.y != RatAngle) 
+			{
+				KrysaRotation ();
+				GetComponent<Animation>().Play ("walk");
+			}
+
+
+			//OTACIME KRYSU NA HRACE KDYZ JE POBLIZ
+			if (RatPathDistance == 1) 
+			{
+				if ((RatX == PlayerX) && (RatZ == PlayerZ+1))
+				{
+					if (RatAngle == -180) CanAttack=true;
+					if (RatAngle == 180) CanAttack=true;
 					if (RatAngle == -90) RatAngle = -180;
 					if (RatAngle !=-180) RatAngle = 180;
-					RatZ -= 1;
 				}
-			
-				if ((PathfindingField [RatX, RatZ+1]) == (RatPathDistance - 1)) 
+
+				if ((RatX == PlayerX) && (RatZ == PlayerZ-1))
 				{
+					if (RatAngle == 0) CanAttack=true;
+					if (RatAngle == 360) CanAttack=true;
 					if (RatAngle == 270) RatAngle = 360;
 					if (RatAngle != 360) RatAngle = 0;
-					RatZ += 1;
 				}
 
-				if ((PathfindingField [RatX-1, RatZ]) == (RatPathDistance - 1)) 
+				if ((RatX == PlayerX+1) && (RatZ == PlayerZ))
 				{
+					if (RatAngle == 270) CanAttack=true;
+					if (RatAngle == -90) CanAttack=true;
 					if (RatAngle == 180) RatAngle = 270;
 					if (RatAngle != 270) RatAngle = -90;
-					RatX -= 1;
 				}
 
-				if ((PathfindingField [RatX+1, RatZ]) == (RatPathDistance - 1)) 
+				if ((RatX == PlayerX-1) && (RatZ == PlayerZ))
 				{
+					if (RatAngle == 90) CanAttack=true;
 					RatAngle = 90;
-					RatX += 1;
+				}
+			}
+
+			//KDYZ JE KRYSA NA MISTE A NEUTOCI, TAK IDLE ANIMACE - zatim se nemuze stat
+			if ((transform.position == new Vector3(RatX,0,RatZ)) && (krysaeulers.y == RatAngle) && (!RatAttackGO)) 
+			{
+				GetComponent<Animation>().Play ("idle");
+			}	
+
+			// KDYZ MUZE ZAUTOCIT TAK ZAUTOCI
+			if ((CanAttack) && (!RatAttackGO))
+			{
+				RatStatus = "attacking";
+				RatAttackTime = Time.time;
+				RatAttackGO = true;
+			}
+
+			// KDYZ ZAUTOCIL/A/O/I TAK PROBIHA UTOK
+			if ((RatAttackGO) && ((Time.time - RatAttackTime)<(RatAttackInterval/2)))
+			{
+				GetComponent<Animation>().Play("4LegsBiteAttack");
+			}
+
+			if ((RatAttackGO) && ((Time.time - RatAttackTime)>(RatAttackInterval/2)))
+			{
+				DoDamage(); 
+				RatAttackGO = false;
+				CanAttack = false;
+			}
+
+			// KRYSA JE MOVING A JE NA MISTE (ratxz = position) SE ZACNE POHYBOVAT NAHODNE NEKAM JINAM
+			if ((RatStatus == "moving") && (transform.position == new Vector3(RatX,0,RatZ)))
+			{
+
+				RatRandomMoveDirection = Random.Range(0,4);
+				Debug.Log (RatRandomMoveDirection);
+
+				if ((RatRandomMoveDirection==0) && (BludisteField[RatX-1,RatZ]==0)) 
+				{ 
+					RatX -= 1;
+					RatAngle = -90;
+					if (krysaeulers.y == 180) { RatAngle =270;}
 				}
 
-				//Debug.Log("kryse prideluji uhel" + RatAngle);
+				if ((RatRandomMoveDirection==1) && (BludisteField[RatX+1,RatZ]==0)) 
+				{ 
+					RatX += 1;
+					RatAngle = 90;
+				}
+
+				if ((RatRandomMoveDirection==2) && (BludisteField[RatX,RatZ+1]==0)) 
+				{ 
+					RatZ += 1;
+					RatAngle = 0;
+				}
+
+				if ((RatRandomMoveDirection==3) && (BludisteField[RatX,RatZ-1]==0)) 
+				{ 
+					RatZ -= 1;
+					RatAngle = 180;
+					if (krysaeulers.y == -90) { RatAngle =-180;}
+				}
+
+				Debug.Log("EULERS JE ROVNO" + krysaeulers.y);
+				Debug.Log("KANGLE JE ROVNO" + RatAngle);
+
 
 			}
 
-	
-		
-	}
+			//KrysaMovement ();
 
-		// KDYZ MA KRYSA JINOU POZICI, TAK ANIMACE NA KOREKTNI POZICI
-		if (transform.position !=new Vector3(RatX,0,RatZ)) 
-		{
-			KrysaMovement();
-			GetComponent<Animation>().Play ("walk");
-		}
-
-		// KDYZ KRYSA DOJDE NAPUL CESTY V PATHFINDINGU TAK ZNOVA PATHFINDING - KRYSA SE PAK POHYBUJE PLYNULE A NE PO SKOCICH
-		if ((transform.position == new Vector3(RatX,0,RatZ)) && (RatPathDistance>1) && (RatPathDistance<100)) 
-		{
-			RatStatus = "sneaking";
-			DoPathfinding = true;
-		}
-
-		if (RatPathDistance == 100) 
-		{
-			RatStatus = "moving";
-		}
-
-		// KDYZ MA KRYSA JINOU ROTACI, TAK ANIMACE NA KOREKTNI ROTACI
-		if (krysaeulers.y != RatAngle) 
-		{
-			KrysaRotation ();
-			GetComponent<Animation>().Play ("walk");
-		}
-
-
-		//OTACIME KRYSU NA HRACE KDYZ JE POBLIZ
-		if (RatPathDistance == 1) 
-		{
-			if ((RatX == PlayerX) && (RatZ == PlayerZ+1))
-			{
-				if (RatAngle == -180) CanAttack=true;
-				if (RatAngle == 180) CanAttack=true;
-				if (RatAngle == -90) RatAngle = -180;
-				if (RatAngle !=-180) RatAngle = 180;
-			}
-
-			if ((RatX == PlayerX) && (RatZ == PlayerZ-1))
-			{
-				if (RatAngle == 0) CanAttack=true;
-				if (RatAngle == 360) CanAttack=true;
-				if (RatAngle == 270) RatAngle = 360;
-				if (RatAngle != 360) RatAngle = 0;
-			}
-
-			if ((RatX == PlayerX+1) && (RatZ == PlayerZ))
-			{
-				if (RatAngle == 270) CanAttack=true;
-				if (RatAngle == -90) CanAttack=true;
-				if (RatAngle == 180) RatAngle = 270;
-				if (RatAngle != 270) RatAngle = -90;
-			}
-
-			if ((RatX == PlayerX-1) && (RatZ == PlayerZ))
-			{
-				if (RatAngle == 90) CanAttack=true;
-				RatAngle = 90;
-			}
-		}
-
-		//KDYZ JE KRYSA NA MISTE A NEUTOCI, TAK IDLE ANIMACE - zatim se nemuze stat
-		if ((transform.position == new Vector3(RatX,0,RatZ)) && (krysaeulers.y == RatAngle) && (!RatAttackGO)) 
-		{
-			GetComponent<Animation>().Play ("idle");
-		}	
-
-		// KDYZ MUZE ZAUTOCIT TAK ZAUTOCI
-		if ((CanAttack) && (!RatAttackGO))
-		{
-			RatStatus = "attacking";
-			RatAttackTime = Time.time;
-			RatAttackGO = true;
-		}
-
-		// KDYZ ZAUTOCIL/A/O/I TAK PROBIHA UTOK
-		if ((RatAttackGO) && ((Time.time - RatAttackTime)<(RatAttackInterval/2)))
-		{
-			GetComponent<Animation>().Play("4LegsBiteAttack");
-		}
-
-		if ((RatAttackGO) && ((Time.time - RatAttackTime)>(RatAttackInterval/2)))
-		{
-			RatAttackGO = false;
-			CanAttack = false;
-			DoDamage(true); 
-		}
-
-		// KRYSA JE MOVING A JE NA MISTE (ratxz = position) SE ZACNE POHYBOVAT NAHODNE NEKAM JINAM
-		if ((RatStatus == "moving") && (transform.position == new Vector3(RatX,0,RatZ)))
-		{
-
-			RatRandomMoveDirection = Random.Range(0,4);
-			Debug.Log (RatRandomMoveDirection);
-
-			if ((RatRandomMoveDirection==0) && (BludisteField[RatX-1,RatZ]==0)) 
-			{ 
-				RatX -= 1;
-				RatAngle = -90;
-				if (krysaeulers.y == 180) { RatAngle =270;}
-			}
-
-			if ((RatRandomMoveDirection==1) && (BludisteField[RatX+1,RatZ]==0)) 
-			{ 
-				RatX += 1;
-				RatAngle = 90;
-			}
-
-			if ((RatRandomMoveDirection==2) && (BludisteField[RatX,RatZ+1]==0)) 
-			{ 
-				RatZ += 1;
-				RatAngle = 0;
-			}
-
-			if ((RatRandomMoveDirection==3) && (BludisteField[RatX,RatZ-1]==0)) 
-			{ 
-				RatZ -= 1;
-				RatAngle = 180;
-				if (krysaeulers.y == -90) { RatAngle =-180;}
-			}
-
-			Debug.Log("EULERS JE ROVNO" + krysaeulers.y);
-			Debug.Log("KANGLE JE ROVNO" + RatAngle);
-
+			//KrysaRotation ();
 
 		}
-		
-		//KrysaMovement ();
-
-		//KrysaRotation ();
-
-
 
 				/*
 				
@@ -400,10 +402,20 @@ public class EnemyRat : MonoBehaviour {
 
 	} //tu konci update
 
-	void DoDamage (bool isHiting) {
-		if (isHiting) {
-			playerController.Hit (damage);
-			Debug.Log (playerController.GetHealth());
+	void DoDamage () {
+		if (CanAttack) {
+			playerController.GetHit (damage);
+			Debug.Log ("Player Health: " + playerController.GetHealth());
+		}
+	}
+
+	void OnMouseDown () {
+		if (CanAttack && health > 0 ) {
+			health -= playerController.GetPlayerDamage();
+			Debug.Log ("Enemy Health: " + health);
+			if (health <= 0) {
+				GetComponent<Animation>().Play("4LegsDeath");
+			}
 		}
 	}
 
