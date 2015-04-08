@@ -20,6 +20,9 @@ public class EnemyRat : MonoBehaviour {
 	string RatStatus;
 	int RatRandomMoveDirection;
 
+	PlayerController playerController;
+	float damage = 15f;
+
 	//pathfinding variables
 	float PathfindingBreak = 2f;
 	float PathfindingTime;
@@ -143,6 +146,7 @@ public class EnemyRat : MonoBehaviour {
 		GetComponent<Animation>().Play ("idle");
 		BludisteField = PoleScript.TestField;
 		RatStatus = "moving";
+		playerController = GameObject.Find("PlayerController").GetComponent<PlayerController>();
 		
 	}
 	
@@ -290,6 +294,7 @@ public class EnemyRat : MonoBehaviour {
 		{
 			RatAttackGO = false;
 			CanAttack = false;
+			DoDamage(true); 
 		}
 
 		// KRYSA JE MOVING A JE NA MISTE (ratxz = position) SE ZACNE POHYBOVAT NAHODNE NEKAM JINAM
@@ -395,5 +400,11 @@ public class EnemyRat : MonoBehaviour {
 
 	} //tu konci update
 
+	void DoDamage (bool isHiting) {
+		if (isHiting) {
+			playerController.Hit (damage);
+			Debug.Log (playerController.GetHealth());
+		}
+	}
 
 }
