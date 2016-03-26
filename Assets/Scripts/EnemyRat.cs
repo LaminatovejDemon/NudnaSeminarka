@@ -55,7 +55,7 @@ public class EnemyRat : MonoBehaviour {
 	void Pathfinding()
 	{
 		PathfindingTime = Time.time;
-		Debug.Log ("DOING PATHFINDING");
+//		Debug.Log ("DOING PATHFINDING");
 		DoPathfinding = false;
 		ClearField ();
 		BludisteField = PoleScript.TestField;
@@ -304,7 +304,7 @@ public class EnemyRat : MonoBehaviour {
 			{
 
 				RatRandomMoveDirection = Random.Range(0,4);
-				Debug.Log (RatRandomMoveDirection);
+//				Debug.Log (RatRandomMoveDirection);
 
 				if ((RatRandomMoveDirection==0) && (BludisteField[RatX-1,RatZ]==0)) 
 				{ 
@@ -332,8 +332,8 @@ public class EnemyRat : MonoBehaviour {
 					if (krysaeulers.y == -90) { RatAngle =-180;}
 				}
 
-				Debug.Log("EULERS JE ROVNO" + krysaeulers.y);
-				Debug.Log("KANGLE JE ROVNO" + RatAngle);
+//				Debug.Log("EULERS JE ROVNO" + krysaeulers.y);
+//				Debug.Log("KANGLE JE ROVNO" + RatAngle);
 
 
 			}
