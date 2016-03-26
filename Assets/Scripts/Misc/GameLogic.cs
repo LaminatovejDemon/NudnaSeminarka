@@ -2,31 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class GeneralHelpers : MonoBehaviour {
+public class GameLogic : MonoSingleton<GameLogic> {
 	public AnimationCurve InterpolationCurve;
 
 	public delegate void OnValueChanged(float value);
 	public delegate void OnVector3Changed(Vector3 value);
-
-	private static GeneralHelpers _instance = null;
-	public static GeneralHelpers Instance
-	{
-		get{
-			if (_instance == null) {
-				GameObject gameLogic_ = GameObject.FindWithTag ("GameLogic");
-				if (gameLogic_ == null) {
-					gameLogic_ = (GameObject)GameObject.Instantiate (Resources.Load ("GameLogic"));
-					gameLogic_.name = "#GameLogic";
-				}
-				_instance = gameLogic_.GetComponent<GeneralHelpers> ();
-
-				if (_instance == null) {
-					_instance = gameLogic_.AddComponent<GeneralHelpers> ();
-				}
-			}
-			return _instance;
-		}
-	}
 
 	class LerpValueData{
 		public LerpValueData(float sourceValue, float targetValue, float length, OnValueChanged onValueChanged){

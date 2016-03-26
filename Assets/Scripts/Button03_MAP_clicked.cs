@@ -4,20 +4,12 @@ using System.Collections;
 public class Button03_MAP_clicked : MonoBehaviour {
 
 	public Camera UICam;
+	bool _MapDisplayed;
 	
 	void OnMouseDown ()
 	{
-		Debug.Log ("BUTTON MAP");
-		Camera.main.enabled = false;
-	}
-
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+		_MapDisplayed = !_MapDisplayed;
+		Debug.Log ("BUTTON MAP" + _MapDisplayed);
+		Map.Instance.DisplayMap(_MapDisplayed);
 	}
 }

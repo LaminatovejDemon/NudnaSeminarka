@@ -19,12 +19,12 @@ public class MainCamera_Movement : MonoBehaviour
 
 	void MoveForward (){
 		_TargetPosition += Quaternion.AngleAxis(_TargetAngle,Vector3.up) * new Vector3(0, 0, 1);
-		GeneralHelpers.Instance.Lerp (_CameraPosition, _TargetPosition, MovementTime, OnPositionChange);
+		GameLogic.Instance.Lerp (_CameraPosition, _TargetPosition, MovementTime, OnPositionChange);
 	}
 
 	void MoveBackwards (){
 		_TargetPosition -= Quaternion.AngleAxis(_TargetAngle,Vector3.up) *  new Vector3 (0, 0, 1);
-		GeneralHelpers.Instance.Lerp (_CameraPosition, _TargetPosition, MovementTime, OnPositionChange);
+		GameLogic.Instance.Lerp (_CameraPosition, _TargetPosition, MovementTime, OnPositionChange);
 	}
 	
 	void TurnLeft (){
@@ -36,7 +36,7 @@ public class MainCamera_Movement : MonoBehaviour
 		}
 		_TargetAngle = _TargetAngle - 90;
 
-		GeneralHelpers.Instance.Lerp (Camera.main.transform.eulerAngles.y, _TargetAngle, RotationTime, OnEulerAngleYChange);
+		GameLogic.Instance.Lerp (Camera.main.transform.eulerAngles.y, _TargetAngle, RotationTime, OnEulerAngleYChange);
 	}
 	
 	void TurnRight (){
@@ -48,7 +48,7 @@ public class MainCamera_Movement : MonoBehaviour
 		}
 		_TargetAngle += 90;
 
-		GeneralHelpers.Instance.Lerp (Camera.main.transform.eulerAngles.y, _TargetAngle, RotationTime, OnEulerAngleYChange);
+		GameLogic.Instance.Lerp (Camera.main.transform.eulerAngles.y, _TargetAngle, RotationTime, OnEulerAngleYChange);
 	}
 	
 	void Start (){
