@@ -20,7 +20,7 @@ public class CaveDoorOpen : MonoBehaviour {
 	{
 		if (
 			!isOpened 
-		    && Vector3.Distance (PositioningScript._PlayerPosition, transform.position) < 1.5f
+			&& Vector3.Distance (PositioningScript._TargetPosition, transform.position) < 1.5f
 		    && (Time.time - PositioningScript._MouseTap) < 1f)
 		{
 			Debug.Log("OTVIRAME DVERE");
@@ -29,7 +29,7 @@ public class CaveDoorOpen : MonoBehaviour {
 			PoleScript.TestField[7,7]=0;
 		} else if (
 			isOpened
-			&& Vector3.Distance (PositioningScript._PlayerPosition, transform.position) < 1.5f
+			&& Vector3.Distance (PositioningScript._TargetPosition, transform.position) < 1.5f
 			&& ((Time.time - PositioningScript._MouseTap) < 1f))
 		{
 			Debug.Log("ZAVIRAME DVERE");

@@ -13,18 +13,27 @@ public class MainCamera_Movement : MonoBehaviour
 	float mousey;
 	public Vector3 _TargetPosition { get; private set;}
 	Vector3 _CameraPosition;
-	public Vector3 _PlayerPosition {get; private set;}
 	//public string _MouseStatus;
 	public float _MouseTap {get; private set;}
 
 	void MoveForward (){
-		_TargetPosition += Quaternion.AngleAxis(_TargetAngle,Vector3.up) * new Vector3(0, 0, 1);
-		GameLogic.Instance.Lerp (_CameraPosition, _TargetPosition, MovementTime, OnPositionChange);
+		Vector3 delta_ = Quaternion.AngleAxis(_TargetAngle,Vector3.up) * new Vector3(0, 0, 1);
+		if (!Map.Instance.CanWalk (_TargetPosition + delta_)) {
+			GameLogic.Instance.Lerp (_CameraPosition, _TargetPosition + delta_, MovementTime, OnPositionChange, GameLogic.CurveType.InvalidMovement);
+		} else { 
+			_TargetPosition += delta_;
+			GameLogic.Instance.Lerp (_CameraPosition, _TargetPosition, MovementTime, OnPositionChange);
+		}
 	}
 
 	void MoveBackwards (){
-		_TargetPosition -= Quaternion.AngleAxis(_TargetAngle,Vector3.up) *  new Vector3 (0, 0, 1);
-		GameLogic.Instance.Lerp (_CameraPosition, _TargetPosition, MovementTime, OnPositionChange);
+		Vector3 delta_ = Quaternion.AngleAxis (_TargetAngle, Vector3.up) * new Vector3 (0, 0, -1);
+		if (!Map.Instance.CanWalk (_TargetPosition + delta_)) {
+			GameLogic.Instance.Lerp (_CameraPosition, _TargetPosition + delta_, MovementTime, OnPositionChange, GameLogic.CurveType.InvalidMovement);
+		} else {
+			_TargetPosition += delta_;
+			GameLogic.Instance.Lerp (_CameraPosition, _TargetPosition, MovementTime, OnPositionChange);
+		}
 	}
 	
 	void TurnLeft (){
@@ -53,7 +62,6 @@ public class MainCamera_Movement : MonoBehaviour
 	
 	void Start (){
 		_TargetPosition = new Vector3 (1, 0.4f, 1);
-		_PlayerPosition = _TargetPosition;
 		_CameraPosition = Camera.main.transform.position;
 	}
 	
@@ -92,20 +100,16 @@ public class MainCamera_Movement : MonoBehaviour
 			float mouseydifference = mouseyy-mousey;
 			
 			if ((mousexdifference > 0) && (Mathf.Abs(mousexdifference) > Mathf.Abs(mouseydifference))){
-				//Debug.Log("OTACIME SE DOPRAVA");
 				TurnRight ();
 			}
 			if ((mousexdifference < 0) && (Mathf.Abs(mousexdifference) > Mathf.Abs(mouseydifference))){
-				//Debug.Log("OTACIME SE DOLEVA");
 				TurnLeft ();
 			}
 
 			if ((mouseydifference > 0) && (Mathf.Abs(mouseydifference) > Mathf.Abs(mousexdifference))){
-				//Debug.Log("JDEME DOPREDU");
 				MoveForward ();
 			}
 			if ((mouseydifference < 0) && (Mathf.Abs(mouseydifference) > Mathf.Abs(mousexdifference))){
-				//Debug.Log("JDEME DOZADU");
 				MoveBackwards ();
 			}
 			

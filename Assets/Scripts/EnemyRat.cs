@@ -61,8 +61,8 @@ public class EnemyRat : MonoBehaviour {
 		BludisteField = PoleScript.TestField;
 		RatPathDistance = 100;
 
-		PlayerX = Mathf.RoundToInt(PathfindingScript._PlayerPosition.x);
-		PlayerZ = Mathf.RoundToInt(PathfindingScript._PlayerPosition.z);
+		PlayerX = Mathf.RoundToInt(PathfindingScript._TargetPosition.x);
+		PlayerZ = Mathf.RoundToInt(PathfindingScript._TargetPosition.z);
 		//Debug.Log ("HRACJENA: " + PlayerX + "," + PlayerZ);
 		PathfindingField[PlayerX,PlayerZ] =0;
 
