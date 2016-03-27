@@ -6,14 +6,20 @@ public class Map : MonoSingleton<Map> {
 
 	public TextAsset MapAsset;
 	public GameObject MapTileTemplate;
-	public Texture2D MapTileSeenTexture;
-	public Texture2D MapTileReachedTexture;
+	public Texture2D MapTilePath;
 	public float MapScale = 1.0f;
 
 	enum MapFlag{
 		Hidden,
 		Seen,
 		Reached,
+	};
+
+	public enum TileType{
+		Block,
+		Path,
+		DoorClosed,
+		DoorOpened,
 	};
 		
 	struct ElementTile{
@@ -26,34 +32,50 @@ public class Map : MonoSingleton<Map> {
 	};
 		
 	class MapTile{
-		public MapTile(MapFlag flag, GameObject tile){
+		public MapTile(MapFlag flag, GameObject tile, TileType type){
 			_Tile = tile;
 			_MapFlag = flag;
+			_TileType = type;
 			_Tile.SetActive(flag > MapFlag.Seen);
 		}
 
-		public void SetFlag(MapFlag flag, Texture2D texture){
+		public void SetFlag(MapFlag flag){
 			if (_MapFlag >= flag) {
 				return;
 			}
 			_MapFlag = flag;
-			_Tile.GetComponent<MeshRenderer> ().material.mainTexture = texture;
+			switch (flag) {
+			case MapFlag.Hidden:
+				_Tile.gameObject.SetActive (false);
+				break;
+			
+			case MapFlag.Seen:
+				_Tile.gameObject.SetActive (true);
+				_Tile.GetComponent<MeshRenderer> ().material.SetColor("_TintColor", new Color(0.3f, 0.3f, 0.3f));
+				break;
+
+			case MapFlag.Reached:
+				_Tile.gameObject.SetActive (true);
+				_Tile.GetComponent<MeshRenderer> ().material.SetColor("_TintColor", Color.white);
+				break;
+			}
+
 			_Tile.gameObject.SetActive(true);
 		}
 
 		public GameObject _Tile{ get; private set; }
 		public MapFlag _MapFlag;
+		public TileType _TileType;
 	};
 		
 	List<ElementTile> _ElementTiles;
 	Camera _UICamera;
-	bool _Initialised = false;
 	MapTile[,] LoadedMap;
 	int _Width;
 	int _Height;
 
 	void Initialise(){
-		if (_Initialised) {
+		if (LoadedMap != null) {
 			return;
 		}
 
@@ -74,7 +96,6 @@ public class Map : MonoSingleton<Map> {
 		if (LoadedMap == null) {
 			LoadMapAsset ();
 		}
-		_Initialised = true;
 	}
 
 	void LoadMapAsset(){
@@ -89,13 +110,8 @@ public class Map : MonoSingleton<Map> {
 		for (int i = 0; i < rows_.Length; ++i) {
 			columns_ = rows_[i].Split(new[]{';'}, System.StringSplitOptions.RemoveEmptyEntries);
 			for (int j = 0; j < columns_.Length; ++j) {
-				if (int.Parse (columns_ [j]) == 0) {
-					GameObject tile_ = GameObject.Instantiate (MapTileTemplate);
-					LoadedMap [i, j] = new MapTile (MapFlag.Hidden, tile_);
-					tile_.transform.parent = transform;
-					tile_.transform.localRotation = Quaternion.identity;
-					tile_.name = "Tile_" + i + "_" + j;
-					tile_.transform.localPosition = Vector3.up * (j - _Width / 2.0f + 0.5f) + Vector3.right * (i - _Height / 2.0f + 0.5f); 
+				if (int.Parse (columns_ [j]) == (int)TileType.Path) {
+					CreateTile (i, j, TileType.Path);
 				} else {
 					LoadedMap [i, j] = null;
 				}
@@ -108,16 +124,51 @@ public class Map : MonoSingleton<Map> {
 		transform.localScale = Vector3.one * Mathf.Min (scaleX_, scaleY_) * MapScale;
 	}
 
+	void CreateTile(int x, int y, TileType type){
+		GameObject tile_ = GameObject.Instantiate (MapTileTemplate);
+		LoadedMap [x, y] = new MapTile (MapFlag.Hidden, tile_, type);
+		tile_.transform.parent = transform;
+		tile_.transform.localRotation = Quaternion.identity;
+		tile_.transform.localScale = Vector3.one;
+		tile_.name = type.ToString() + "_" + x + "_" + y;
+		tile_.transform.localPosition = Vector3.up * (y - _Width / 2.0f + 0.5f) + Vector3.right * (x - _Height / 2.0f + 0.5f); 
+	}
+
 	public bool CanWalk(Vector3 destination){
 		int x_ = (int)(destination.x + 0.5f);
 		int y_ = (int)(destination.z + 0.5f);
-		return (LoadedMap [x_, y_] != null);
+
+		if (LoadedMap [x_, y_] == null) {
+			return false;
+		}
+
+		return (LoadedMap [x_, y_]._TileType == Map.TileType.DoorOpened || LoadedMap [x_, y_]._TileType == Map.TileType.Path);
 	}
 
 	public void DisplayMap(bool state){
 		Initialise ();
 
 		this.gameObject.SetActive(state);
+	}
+		
+	public void UpdateTile(GameObject source, TileType targetType, Texture2D texture = null) {
+		Initialise ();
+
+		int x_ = (int)(source.transform.position.x + 0.5f);
+		int y_ = (int)(source.transform.position.z + 0.5f);
+	
+		if (LoadedMap [x_, y_] == null) {
+			CreateTile (x_, y_, targetType);
+		} else {
+			LoadedMap [x_, y_]._TileType = targetType;
+		}
+		LoadedMap [x_, y_]._Tile.transform.localRotation = Quaternion.AngleAxis (source.transform.eulerAngles.y, Vector3.forward);
+
+		if (texture != null) {
+			LoadedMap [x_, y_]._Tile.GetComponent<MeshRenderer> ().material.mainTexture = texture;
+		}
+
+		UpdateElement (Camera.main.GetComponent<MapElement> ());
 	}
 
 	public void UpdateElement(MapElement source){
@@ -155,15 +206,28 @@ public class Map : MonoSingleton<Map> {
 			return;
 		}
 
-		LoadedMap [x_, y_].SetFlag (MapFlag.Reached, MapTileReachedTexture);
+		LoadedMap [x_, y_].SetFlag (MapFlag.Reached);
 
-		for (int i = 1; i < source.Visibility; ++i) {
-			int dstX_ = x_ + (int)(lookX_ * i);
-			int dstY_ = y_ + (int)(lookY_ * i);
-			if (dstX_ < 0 || dstX_ >= _Width || dstY_ < 0 || dstY_ >= _Height || LoadedMap [dstX_, dstY_] == null) {
-				break;
+		UncoverVisibleMap (source.Visibility, x_, y_, lookX_, lookY_);
+	}
+
+	void UncoverVisibleMap(int depth, int x, int y, float lookX, float lookY)
+	{
+		for (int i = 1; i < depth; ++i) {
+			int x_ = x + (int)(lookX * i);
+			int y_ = y + (int)(lookY * i);
+			if (x_ < 0 || x_ >= _Width || y_ < 0 || y_ >= _Height || LoadedMap[x_, y_] == null ) {
+				return;
 			} else {
-				LoadedMap [dstX_, dstY_].SetFlag (MapFlag.Seen, MapTileSeenTexture);	
+				LoadedMap [x_, y_].SetFlag (MapFlag.Seen);	
+
+				switch (LoadedMap [x_, y_]._TileType) {
+				case TileType.DoorClosed:
+				case TileType.Block:
+					return;
+				default:
+					break;
+				}
 			}
 		}
 	}
