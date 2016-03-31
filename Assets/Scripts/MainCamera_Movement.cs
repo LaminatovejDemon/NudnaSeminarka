@@ -7,6 +7,7 @@ public class MainCamera_Movement : MonoBehaviour
 	public float RotationTime = 0.25f;
 	public float MovementTime = 0.3f;
 	public float CameraDistance = 0.5f;
+    public float CameraY = 0.4f;
 
 	pole_01 targetpolecondition_01;
 	float mousex;
@@ -61,7 +62,7 @@ public class MainCamera_Movement : MonoBehaviour
 	}
 	
 	void Start (){
-		_TargetPosition = new Vector3 (1, 0.4f, 1);
+		_TargetPosition = new Vector3 (1, CameraY, 1);
 		_CameraPosition = Camera.main.transform.position;
 	}
 	
